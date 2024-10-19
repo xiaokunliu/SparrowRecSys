@@ -30,3 +30,5 @@ SparrowRecSys.iml
 TFRecModel.iml
 RecPySpark.iml
 .vscode/
+.metals/
+.bloop/
