@@ -15,16 +15,15 @@ from tensorflow.python.ops import math_ops
 import numpy as np
 import random
 
+# define base path
+base_path = '/Users/keithl/github/personal/SparrowRecSys/offline/resources'
 
 # Training samples path, change to your local path
 training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
-                                                     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                     "/resources/webroot/sampledata/trainingSamples.csv")
+                                                     base_path + "/sampledata/trainingSamples.csv")
 # Test samples path, change to your local path
 test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
-                                                 "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                 "/resources/webroot/sampledata/testSamples.csv")
-
+                                                 base_path + "/sampledata/testSamples.csv")
 
 
 def get_dataset_with_negtive_movie(path,batch_size,seed_num):

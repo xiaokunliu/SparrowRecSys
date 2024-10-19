@@ -1,13 +1,14 @@
 import tensorflow as tf
 
+# define base path
+base_path = '/Users/keithl/github/personal/SparrowRecSys/offline/resources'
+
 # Training samples path, change to your local path
 training_samples_file_path = tf.keras.utils.get_file("trainingSamples.csv",
-                                                     "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                     "/resources/webroot/sampledata/trainingSamples.csv")
+                                                     base_path + "/sampledata/trainingSamples.csv")
 # Test samples path, change to your local path
 test_samples_file_path = tf.keras.utils.get_file("testSamples.csv",
-                                                 "file:///Users/zhewang/Workspace/SparrowRecSys/src/main"
-                                                 "/resources/webroot/sampledata/testSamples.csv")
+                                                base_path + "/sampledata/testSamples.csv")
 
 
 # load sample as tf dataset

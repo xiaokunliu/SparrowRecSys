@@ -186,16 +186,43 @@ def generateUserEmb(spark, rawSampleDataPath, model, embLength, embOutputPath, s
 if __name__ == '__main__':
     conf = SparkConf().setAppName('ctrModel').setMaster('local')
     spark = SparkSession.builder.config(conf=conf).getOrCreate()
-    # Change to your own filepath
-    file_path = 'file:///home/hadoop/SparrowRecSys/src/main/resources'
-    rawSampleDataPath = file_path + "/webroot/sampledata/ratings.csv"
+      
+    # Change to your own filepath base data path
+    file_path = '/Users/keithl/github/personal/SparrowRecSys/offline/resources'
+    
+    # embedding output path
+    output_path = '/Users/keithl/github/personal/SparrowRecSys/offline/output'
+    rawSampleDataPath = file_path + "/sampledata/ratings.csv"
     embLength = 10
     samples = processItemSequence(spark, rawSampleDataPath)
-    model = trainItem2vec(spark, samples, embLength,
-                          embOutputPath=file_path[7:] + "/webroot/modeldata2/item2vecEmb.csv", saveToRedis=False,
+    
+    """
+    train item2vec model
+    """
+    model = trainItem2vec(spark, 
+                          samples, 
+                          embLength,
+                          embOutputPath=output_path + "/embedding/item2vecEmb.csv",
+                          saveToRedis=False,
                           redisKeyPrefix="i2vEmb")
-    graphEmb(samples, spark, embLength, embOutputFilename=file_path[7:] + "/webroot/modeldata2/itemGraphEmb.csv",
-             saveToRedis=True, redisKeyPrefix="graphEmb")
-    generateUserEmb(spark, rawSampleDataPath, model, embLength,
-                    embOutputPath=file_path[7:] + "/webroot/modeldata2/userEmb.csv", saveToRedis=False,
+    
+    """
+    train item graph embedding model
+    """
+    graphEmb(samples, 
+             spark, 
+             embLength, 
+             embOutputFilename=output_path + "/embedding/itemGraphEmb.csv",
+             saveToRedis=True, 
+             redisKeyPrefix="graphEmb")
+    
+    """
+    generate user embedding model
+    """
+    generateUserEmb(spark, 
+                    rawSampleDataPath, 
+                    model, 
+                    embLength,
+                    embOutputPath=output_path + "/embedding/userEmb.csv",
+                    saveToRedis=False,
                     redisKeyPrefix="uEmb")

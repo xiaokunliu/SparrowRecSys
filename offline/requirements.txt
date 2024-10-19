@@ -1,2 +1,4 @@
 pyspark==3.5.3
-
+tensorflow==2.16.2
+numpy==1.26.4
+psutil==6.1.0
