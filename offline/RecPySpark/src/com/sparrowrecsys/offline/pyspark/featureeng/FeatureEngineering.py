@@ -1,6 +1,6 @@
 from pyspark import SparkConf
 from pyspark.ml import Pipeline
-from pyspark.ml.feature import OneHotEncoderEstimator, StringIndexer, QuantileDiscretizer, MinMaxScaler
+from pyspark.ml.feature import OneHotEncoder as OneHotEncoderEstimator, StringIndexer, QuantileDiscretizer, MinMaxScaler
 from pyspark.ml.linalg import VectorUDT, Vectors
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
@@ -9,6 +9,12 @@ from pyspark.sql import functions as F
 
 
 def oneHotEncoderExample(movieSamples):
+    u"""
+    from spark version 2.4 upon the OneHotEncoderEstimator is removed, use OneHotEncoder instead
+    see: 
+    https://spark.apache.org/docs/latest/ml-features#onehotencoder
+    https://stackoverflow.com/questions/59926511/pyspark-cannot-import-name-onehotencoderestimator
+    """
     samplesWithIdNumber = movieSamples.withColumn("movieIdNumber", F.col("movieId").cast(IntegerType()))
     encoder = OneHotEncoderEstimator(inputCols=["movieIdNumber"], outputCols=['movieIdVector'], dropLast=False)
     oneHotEncoderSamples = encoder.fit(samplesWithIdNumber).transform(samplesWithIdNumber)
@@ -71,6 +77,6 @@ if __name__ == '__main__':
     print("MultiHotEncoder Example:")
     multiHotEncoderExample(movieSamples)
     print("Numerical features Example:")
-    ratingsResourcesPath = file_path + "/webroot/sampledata/ratings.csv"
+    ratingsResourcesPath = file_path + "/sampledata/ratings.csv"
     ratingSamples = spark.read.format('csv').option('header', 'true').load(ratingsResourcesPath)
     ratingFeatures(ratingSamples)

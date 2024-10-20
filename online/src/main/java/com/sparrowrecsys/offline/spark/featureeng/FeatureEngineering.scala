@@ -8,20 +8,32 @@ import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 
+/**
+ * 特征处理
+ * 特征工程类
+ * 与py的FeatureEngineering.py相对应
+ */
 object FeatureEngineering {
   /**
+   * 类别型特征处理
+   * One-hot 编码转换器
    * One-hot encoding example function
    * @param samples movie samples dataframe
    */
   def oneHotEncoderExample(samples:DataFrame): Unit ={
+    //samples样本集中的每一条数据代表一部电影的信息，其中movieId为电影id
     val samplesWithIdNumber = samples.withColumn("movieIdNumber", col("movieId").cast(sql.types.IntegerType))
 
+    //利用Spark的机器学习库Spark MLlib创建One-hot编码器
     val oneHotEncoder = new OneHotEncoderEstimator()
       .setInputCols(Array("movieIdNumber"))
       .setOutputCols(Array("movieIdVector"))
       .setDropLast(false)
 
+    //训练One-hot编码器，并完成从id特征到One-hot向量的转换
     val oneHotEncoderSamples = oneHotEncoder.fit(samplesWithIdNumber).transform(samplesWithIdNumber)
+    
+    //打印One-hot编码后的数据集的schema和前10条数据
     oneHotEncoderSamples.printSchema()
     oneHotEncoderSamples.show(10)
   }
@@ -29,6 +41,7 @@ object FeatureEngineering {
   val array2vec: UserDefinedFunction = udf { (a: Seq[Int], length: Int) => org.apache.spark.ml.linalg.Vectors.sparse(length, a.sortWith(_ < _).toArray, Array.fill[Double](a.length)(1.0)) }
 
   /**
+   * 标签类型特征处理
    * Multi-hot encoding example function
    * @param samples movie samples dataframe
    */
@@ -55,6 +68,7 @@ object FeatureEngineering {
   val double2vec: UserDefinedFunction = udf { (value: Double) => org.apache.spark.ml.linalg.Vectors.dense(value) }
 
   /**
+   * 数值型特征的处理 - 归一化和分桶
    * Process rating samples
    * @param samples rating samples
    */
@@ -63,6 +77,7 @@ object FeatureEngineering {
     samples.show(10)
 
     //calculate average movie rating score and rating count
+    //利用打分表ratings计算电影的平均分、被打分次数等数值型特征
     val movieFeatures = samples.groupBy(col("movieId"))
       .agg(count(lit(1)).as("ratingCount"),
         avg(col("rating")).as("avgRating"),
@@ -72,16 +87,19 @@ object FeatureEngineering {
     movieFeatures.show(10)
 
     //bucketing
+    //分桶处理，创建QuantileDiscretizer进行分桶，将打分次数这一特征分到100个桶中
     val ratingCountDiscretizer = new QuantileDiscretizer()
       .setInputCol("ratingCount")
       .setOutputCol("ratingCountBucket")
       .setNumBuckets(100)
 
     //Normalization
+    //归一化处理，创建MinMaxScaler进行归一化，将平均得分进行归一化
     val ratingScaler = new MinMaxScaler()
       .setInputCol("avgRatingVec")
       .setOutputCol("scaleAvgRating")
 
+    //创建一个pipeline，依次执行两个特征处理过程
     val pipelineStage: Array[PipelineStage] = Array(ratingCountDiscretizer, ratingScaler)
     val featurePipeline = new Pipeline().setStages(pipelineStage)
 
